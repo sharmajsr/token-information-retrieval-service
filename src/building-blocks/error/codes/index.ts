@@ -9,6 +9,16 @@ export const ERROR = {
           connectorError: error,
         },
       ];
+    },
+    RATE_LIMIT_EXCEEDED_EXCEPTION: (error) => {
+      return [
+        {
+          code: 'RATE_LIMIT_EXCEEDED_EXCEPTION',
+          message:
+            'rate limit has been exceeded for the last minute',
+          connectorError: error,
+        },
+      ];
     }
    
   };

@@ -3,6 +3,7 @@ import { firstValueFrom, flatMap } from "rxjs";
 import { TokenRetriveResponse } from "../models";
 import { HttpService } from '@nestjs/axios';
 import { CoinGeckoException } from "src/building-blocks/exception/no-token-found-exception";
+import { RateLimitException } from "src/building-blocks/exception/rate-limit-exceeded-exception";
 
 @Injectable()
 export class TokenClient{
@@ -10,7 +11,52 @@ export class TokenClient{
         private readonly httpService: HttpService,
       ) {}
 
-    async getTokenDetails(id :string ): Promise<TokenRetriveResponse>{
+    async getTokenDetails(id :string , token:string): Promise<TokenRetriveResponse>{
+
+      const url = `http://localhost:3001/key/user-access?id=${token}`;
+      const headers = { Authorization: 'Bearer static-jwt-token' };
+  
+      try {
+        const response = await firstValueFrom(
+          this.httpService.get(url, { headers })
+        );
+        console.log(response.data)
+        console.log(response.data.status)
+        if (response.data.status) {
+          
+          const url = 'http://localhost:3001/key/add-requests';
+          const data = {
+            id: `${token}`
+          };
+          const headers = {
+            Authorization: 'Bearer static-jwt-token',
+            'Content-Type': 'application/json',
+          };
+      
+          try {
+            const response = await firstValueFrom(
+              this.httpService.post(url, data, { headers })
+            );
+            // return response.data; 
+          } catch (error) {
+            // handle error as appropriate
+            console.error('Error occurred:', error);
+            throw error;
+          }
+        
+
+          
+        } else {
+          throw new RateLimitException(
+            "you have made too many requests in last minute, please try after a minute",400
+          );
+        }
+      } catch (error) {
+        throw new RateLimitException(
+            "http error, please contact support",400
+          );
+      }
+
       let keyRetriveResponse = new TokenRetriveResponse();
       
       try{

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { TokenResponseDto } from '../core/dtos';
@@ -17,8 +17,9 @@ export class TokenController {
     type: TokenResponseDto,
   })
   @Get()
-  async getById(@Query() query: QueryParamDto) {
+  async getById(@Query() query: QueryParamDto,@Req() req: Request) {
     console.log(`contr ${query.id}`)
-    return this.queryBus.execute(new TokenGetQuery(query.id));
+    const headers = req.headers;
+    return this.queryBus.execute(new TokenGetQuery(query.id,headers["authorization"]));
   }
 }

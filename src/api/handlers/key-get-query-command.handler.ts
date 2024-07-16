@@ -12,7 +12,7 @@ export class TokenGetQueryHandler implements IQueryHandler<TokenGetQuery> {
 
   async execute(query: TokenGetQuery) {
     console.log(` her ${query.id}`)
-    const keyView = await this.tokenApiClient.getTokenDetails(query.id);
+    const keyView = await this.tokenApiClient.getTokenDetails(query.id,query.token);
 
     return this.tokenMapper.mapToTokenRetrieveModel(keyView);
   }
